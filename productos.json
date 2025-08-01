@@ -1,0 +1,82 @@
+[
+  {
+    "id": "papel001",
+    "nombre": "Resma de Papel Carta (500 hojas)",
+    "descripcion": "Papel blanco de alta calidad 75gr, ideal para impresoras y uso diario.",
+    "precio": 8.99,
+    "imagen": "resma_papel.jpg",
+    "categoria": "Papelería"
+  },
+  {
+    "id": "boligrafo002",
+    "nombre": "Set de Bolígrafos Azules (10 unidades)",
+    "descripcion": "Bolígrafos de tinta azul, punta media (1.0mm), escritura suave.",
+    "precio": 4.50,
+    "imagen": "boligrafos.jpg",
+    "categoria": "Papelería"
+  },
+  {
+    "id": "cuaderno003",
+    "nombre": "Cuaderno Espiral Rayado A4",
+    "descripcion": "100 hojas, tapa dura, espiral resistente. Perfecto para apuntes.",
+    "precio": 3.75,
+    "imagen": "cuaderno.jpg",
+    "categoria": "Papelería"
+  },
+  {
+    "id": "engrapadora004",
+    "nombre": "Engrapadora de Oficina Estándar",
+    "descripcion": "Capacidad de 20 hojas, incluye caja de grapas. Ideal para uso diario.",
+    "precio": 7.20,
+    "imagen": "engrapadora.jpg",
+    "categoria": "Oficina"
+  },
+  {
+    "id": "perforadora005",
+    "nombre": "Perforadora Doble Orificio",
+    "descripcion": "Perfora hasta 10 hojas. Diseño compacto para escritorio.",
+    "precio": 5.99,
+    "imagen": "perforadora.jpg",
+    "categoria": "Oficina"
+  },
+  {
+    "id": "tijeras006",
+    "nombre": "Tijeras de Oficina (18 cm)",
+    "descripcion": "Hojas de acero inoxidable, mango ergonómico. Para cortes precisos.",
+    "precio": 2.80,
+    "imagen": "tijeras.jpg",
+    "categoria": "Papelería"
+  },
+  {
+    "id": "clips007",
+    "nombre": "Caja de Clips Sujetapapeles (100 unidades)",
+    "descripcion": "Clips metálicos recubiertos, tamaño estándar. Ideal para organizar documentos.",
+    "precio": 1.50,
+    "imagen": "clips.jpg",
+    "categoria": "Oficina"
+  },
+  {
+    "id": "carpetas008",
+    "nombre": "Set de Carpetas Plásticas (5 unidades)",
+    "descripcion": "Carpetas tamaño carta, colores surtidos. Protege tus documentos.",
+    "precio": 6.10,
+    "imagen": "carpetas.jpg",
+    "categoria": "Oficina"
+  },
+  {
+    "id": "pegamento009",
+    "nombre": "Barra de Pegamento (20g)",
+    "descripcion": "Pegamento en barra, no tóxico, ideal para papel y cartulina.",
+    "precio": 1.90,
+    "imagen": "pegamento.jpg",
+    "categoria": "Papelería"
+  },
+  {
+    "id": "postits010",
+    "nombre": "Notas Adhesivas Post-it (3x3 pulgadas)",
+    "descripcion": "Block de 100 notas adhesivas, color amarillo. Para recordatorios rápidos.",
+    "precio": 2.25,
+    "imagen": "postits.jpg",
+    "categoria": "Papelería"
+  }
+]
