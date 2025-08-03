@@ -30,6 +30,28 @@
         <button id="finalizar-pedido">Finalizar Pedido</button>
     </div>
 
+    <div id="confirmOrderModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Confirmar Pedido</h2>
+            <div id="orderSummary">
+                <h3>Tu Pedido Actual:</h3>
+                <ul id="modal-lista-carrito"></ul>
+                <p>Total: $<span id="modal-total-pedido">0.00</span></p>
+            </div>
+            
+            <div id="customerInfoForm">
+                <h3>Datos de la Empresa:</h3>
+                <label for="empresaNombre">Nombre de la Empresa:</label>
+                <input type="text" id="empresaNombre" placeholder="Ej. Tu Empresa C.A." required>
+                
+                <label for="empresaRif">Número de RIF:</label>
+                <input type="text" id="empresaRif" placeholder="Ej. J-12345678-9" required>
+            </div>
+            
+            <button id="sendOrderBtn">Enviar Pedido por WhatsApp</button>
+        </div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>

@@ -103,6 +103,7 @@ header h1 {
     display: flex;
     flex-direction: column;
     justify-content: space-between; /* Para que el botón esté abajo */
+    position: relative; /* Importante para que el contenido se posicione correctamente */
 }
 
 .producto-card img {
@@ -140,22 +141,56 @@ header h1 {
     margin-bottom: 15px;
 }
 
-.producto-card button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: background-color 0.3s ease;
-    align-self: center; /* Centra el botón */
-    width: 90%; /* Ancho del botón */
+/* Nuevos estilos para los controles de cantidad */
+.add-to-cart-controls {
+    display: flex;
+    justify-content: center; /* Centrar los elementos */
+    align-items: center;
+    gap: 8px; /* Espacio entre los elementos */
+    margin-top: 10px;
+    width: 100%; /* Ocupa el ancho completo de la tarjeta */
+    box-sizing: border-box;
+    padding: 0 10px; /* Pequeño padding interno para que no pegue a los bordes */
 }
 
-.producto-card button:hover {
+.add-to-cart-controls .agregar-carrito {
+    flex-grow: 1; /* Hace que el botón "Agregar" ocupe el mayor espacio posible */
+    padding: 12px 15px; /* Padding más grande para el botón principal */
+    background-color: #007bff; /* Color original del botón */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em; /* Fuente ligeramente más grande */
+    font-weight: bold; /* Negrita para destacar */
+    transition: background-color 0.3s ease;
+    box-sizing: border-box;
+    white-space: nowrap; /* Evita que el texto del botón se rompa */
+}
+
+.add-to-cart-controls .agregar-carrito:hover {
     background-color: #0056b3;
 }
+
+.add-to-cart-controls .cantidad-input-directa {
+    width: 60px; /* Ancho más pequeño para el input de cantidad directa */
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 0.9em;
+    box-sizing: border-box;
+    -moz-appearance: textfield; /* Para Firefox */
+}
+.add-to-cart-controls .cantidad-input-directa::-webkit-outer-spin-button,
+.add-to-cart-controls .cantidad-input-directa::-webkit-inner-spin-button {
+    -webkit-appearance: none; /* Oculta las flechas en navegadores WebKit (Chrome, Safari) */
+    margin: 0;
+}
+
+
+/* No necesitamos .producto-cantidad-en-carrito porque la cantidad ahora está en el botón */
+
 
 #carrito {
     border: 1px solid #795548; /* Borde color madera */
@@ -237,6 +272,144 @@ header h1 {
     background-color: #218838;
 }
 
+/* --- Estilos para el Modal de Confirmación --- */
+.modal {
+    display: none; /* Oculto por defecto */
+    position: fixed; /* Posición fija para cubrir toda la pantalla */
+    z-index: 1000; /* Asegura que esté por encima de todo */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Habilita el scroll si el contenido es muy largo */
+    background-color: rgba(0,0,0,0.6); /* Fondo semi-transparente oscuro */
+    padding-top: 50px; /* Espacio desde arriba */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto; /* 5% desde arriba y centrado horizontalmente */
+    padding: 30px;
+    border: 1px solid #888;
+    width: 90%; /* Ancho responsivo */
+    max-width: 600px; /* Ancho máximo */
+    border-radius: 10px;
+    position: relative;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+}
+
+/* Animación de entrada del modal */
+@keyframes animatetop {
+    from {top: -300px; opacity: 0}
+    to {top: 0; opacity: 1}
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-content h2 {
+    text-align: center;
+    color: #5d4037;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #795548;
+    padding-bottom: 10px;
+}
+
+#orderSummary {
+    margin-bottom: 25px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    padding: 15px;
+    background-color: #f9f9f9;
+}
+
+#orderSummary h3 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+#modal-lista-carrito {
+    list-style: none;
+    padding: 0;
+    max-height: 200px; /* Limita la altura para el scroll si hay muchos items */
+    overflow-y: auto;
+    border-bottom: 1px dashed #c0d8f0;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+#modal-lista-carrito li {
+    padding: 5px 0;
+    font-size: 0.9em;
+    color: #555;
+}
+
+#modal-total-pedido {
+    font-weight: bold;
+    color: #007bff;
+    font-size: 1.3em;
+    display: block;
+    text-align: right;
+    margin-top: 10px;
+}
+
+#customerInfoForm {
+    margin-top: 20px;
+}
+
+#customerInfoForm label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #444;
+}
+
+#customerInfoForm input[type="text"] {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+    box-sizing: border-box; /* Incluye padding en el ancho */
+}
+
+#sendOrderBtn {
+    width: 100%;
+    padding: 15px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+#sendOrderBtn:hover {
+    background-color: #218838;
+}
+
 /* --- Media Queries para Responsividad --- */
 @media (max-width: 768px) {
     header h1 {
@@ -271,5 +444,22 @@ header h1 {
     #carrito {
         margin: 20px auto;
         padding: 15px;
+    }
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+        padding: 20px;
+    }
+    #modal-lista-carrito {
+        max-height: 150px;
+    }
+    .add-to-cart-controls .agregar-carrito {
+        font-size: 0.9em;
+        padding: 10px;
+    }
+    .add-to-cart-controls .cantidad-input-directa {
+        width: 50px;
+        font-size: 0.8em;
+        padding: 6px;
     }
 }
