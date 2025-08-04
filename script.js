@@ -38,21 +38,23 @@ function mostrarProductos(productosAMostrar) {
     }
 
     productosAMostrar.forEach(producto => {
-        const productoCard = document.createElement('div');
-        productoCard.classList.add('producto-card');
-        
-        // Determinar la cantidad actual en el carrito para este producto
         const itemEnCarrito = carrito.find(item => item.id === producto.id);
         const cantidadActual = itemEnCarrito ? itemEnCarrito.cantidad : 0;
 
+        const productoCard = document.createElement('div');
+        productoCard.classList.add('producto-card');
         productoCard.innerHTML = `
             <img src="imagenes/${producto.imagen}" alt="${producto.nombre}">
             <h3>${producto.nombre}</h3>
             <p>${producto.descripcion}</p>
             <p class="precio">$${producto.precio.toFixed(2)}</p>
             <div class="add-to-cart-controls">
-                <button class="agregar-carrito" data-id="${producto.id}">Agregar (${cantidadActual})</button>
-                <input type="number" value="" min="1" placeholder="Cant." class="cantidad-input-directa" data-id="${producto.id}">
+                <button class="agregar-carrito" data-id="${producto.id}">Agregar</button>
+                <div class="cantidad-selector">
+                    <button class="cantidad-btn decrementar" data-id="${producto.id}">-</button>
+                    <input type="number" value="${cantidadActual > 0 ? cantidadActual : ''}" min="0" placeholder="Cant." class="cantidad-input-directa" data-id="${producto.id}">
+                    <button class="cantidad-btn incrementar" data-id="${producto.id}">+</button>
+                </div>
             </div>
         `;
         productosContainer.appendChild(productoCard);
@@ -67,41 +69,57 @@ function mostrarProductos(productosAMostrar) {
     // Añadir event listeners a los inputs de cantidad directa (al presionar Enter o cambiar el valor)
     const inputsCantidadDirecta = document.querySelectorAll('.cantidad-input-directa');
     inputsCantidadDirecta.forEach(input => {
-        input.addEventListener('change', (event) => agregarCantidadDirecta(event.target.dataset.id, parseInt(event.target.value)));
+        input.addEventListener('change', (event) => {
+            const cantidad = parseInt(event.target.value);
+            if (!isNaN(cantidad) && event.target.value !== '') {
+                agregarCantidadDirecta(event.target.dataset.id, cantidad);
+            }
+        });
         input.addEventListener('keyup', (event) => {
             if (event.key === 'Enter') {
-                agregarCantidadDirecta(event.target.dataset.id, parseInt(event.target.value));
-                event.target.blur(); // Quitar el foco del input
+                const cantidad = parseInt(event.target.value);
+                if (!isNaN(cantidad) && event.target.value !== '') {
+                    agregarCantidadDirecta(event.target.dataset.id, cantidad);
+                    event.target.blur(); // Quitar el foco del input
+                }
             }
         });
     });
 
-    actualizarBotonesCantidad(); // Actualizar el texto de los botones al mostrar productos
+    // Añadir event listeners a los nuevos botones de incremento/decremento
+    const botonesIncrementar = document.querySelectorAll('.cantidad-btn.incrementar');
+    botonesIncrementar.forEach(boton => {
+        boton.addEventListener('click', incrementarCantidad);
+    });
+
+    const botonesDecrementar = document.querySelectorAll('.cantidad-btn.decrementar');
+    botonesDecrementar.forEach(boton => {
+        boton.addEventListener('click', decrementarCantidad);
+    });
+
+    actualizarBotonesCantidad();
 }
 
 // --- Lógica del Buscador y Categorías ---
 
 function cargarCategorias() {
-    const categorias = new Set(); // Usamos Set para obtener categorías únicas
+    const categorias = new Set();
     todosLosProductos.forEach(producto => {
         if (producto.categoria) {
             categorias.add(producto.categoria);
         }
     });
 
-    categoriesContainer.innerHTML = ''; // Limpiar antes de añadir botones
+    categoriesContainer.innerHTML = '';
 
-    // Botón "Todos" para ver todos los productos
     const btnTodos = document.createElement('button');
     btnTodos.textContent = 'Todos';
     btnTodos.classList.add('category-button');
-    btnTodos.classList.add('active'); // Activo por defecto
+    btnTodos.classList.add('active');
     btnTodos.dataset.categoria = 'Todos';
     btnTodos.addEventListener('click', filtrarPorCategoria);
     categoriesContainer.appendChild(btnTodos);
 
-    // Botones para cada categoría única
-    // Ordenamos las categorías alfabéticamente para una mejor UX
     Array.from(categorias).sort().forEach(categoria => {
         const button = document.createElement('button');
         button.textContent = categoria;
@@ -116,14 +134,12 @@ function filtrarProductos() {
     let productosFiltrados = todosLosProductos;
     const searchTerm = searchInput.value.toLowerCase().trim();
 
-    // 1. Filtrar por categoría (si hay una seleccionada y no es 'Todos')
     if (categoriaSeleccionada !== 'Todos') {
         productosFiltrados = productosFiltrados.filter(producto => 
             producto.categoria && producto.categoria === categoriaSeleccionada
         );
     }
 
-    // 2. Filtrar por término de búsqueda (si hay un término)
     if (searchTerm) {
         productosFiltrados = productosFiltrados.filter(producto =>
             producto.nombre.toLowerCase().includes(searchTerm) ||
@@ -136,26 +152,23 @@ function filtrarProductos() {
 }
 
 function filtrarPorCategoria(event) {
-    // Eliminar la clase 'active' de todos los botones
     document.querySelectorAll('.category-button').forEach(btn => {
         btn.classList.remove('active');
     });
 
-    // Añadir la clase 'active' al botón clickeado
     event.target.classList.add('active');
 
     categoriaSeleccionada = event.target.dataset.categoria;
-    filtrarProductos(); // Llama a la función de filtro general
-    searchInput.value = ''; // Limpia el buscador al cambiar de categoría
+    filtrarProductos();
+    searchInput.value = '';
 }
 
-// Escuchador de eventos para el campo de búsqueda
 searchInput.addEventListener('keyup', filtrarProductos);
 
 // --- Fin Lógica del Buscador y Categorías ---
 
 
-// --- Lógica de Agregar al Carrito (Incremento y Cantidad Directa) ---
+// --- Lógica de Agregar al Carrito (Incremento, Cantidad Directa, +/-) ---
 
 function agregarIncrementarCantidad(evento) {
     const productoId = evento.target.dataset.id;
@@ -172,8 +185,35 @@ function agregarIncrementarCantidad(evento) {
     }
 }
 
+function incrementarCantidad(evento) {
+    const productoId = evento.target.dataset.id;
+    const itemEnCarrito = carrito.find(item => item.id === productoId);
+
+    if (itemEnCarrito) {
+        itemEnCarrito.cantidad++;
+    } else {
+        const producto = todosLosProductos.find(p => p.id === productoId);
+        if (producto) {
+            carrito.push({ ...producto, cantidad: 1 });
+        }
+    }
+    actualizarCarrito();
+}
+
+function decrementarCantidad(evento) {
+    const productoId = evento.target.dataset.id;
+    const itemIndex = carrito.findIndex(item => item.id === productoId);
+
+    if (itemIndex > -1) {
+        carrito[itemIndex].cantidad--;
+        if (carrito[itemIndex].cantidad <= 0) {
+            carrito.splice(itemIndex, 1);
+        }
+    }
+    actualizarCarrito();
+}
+
 function agregarCantidadDirecta(productoId, cantidad) {
-    // Validar que la cantidad sea un número válido y mayor o igual a 0
     if (isNaN(cantidad) || cantidad < 0) {
         alert('Por favor, ingresa una cantidad válida (mínimo 0).');
         return;
@@ -185,21 +225,13 @@ function agregarCantidadDirecta(productoId, cantidad) {
     const itemEnCarrito = carrito.find(item => item.id === productoId);
 
     if (cantidad === 0) {
-        // Si la cantidad es 0, eliminar el producto del carrito
         carrito = carrito.filter(item => item.id !== productoId);
     } else if (itemEnCarrito) {
-        // Si ya está en el carrito, actualizar la cantidad
         itemEnCarrito.cantidad = cantidad;
     } else {
-        // Si no está en el carrito, añadirlo con la cantidad especificada
         carrito.push({ ...producto, cantidad: cantidad });
     }
     actualizarCarrito();
-    // Limpiar el input después de agregar/actualizar
-    const inputElement = document.querySelector(`.cantidad-input-directa[data-id="${productoId}"]`);
-    if (inputElement) {
-        inputElement.value = '';
-    }
 }
 
 function actualizarCarrito() {
@@ -207,6 +239,8 @@ function actualizarCarrito() {
     let total = 0;
     carrito.forEach(item => {
         const li = document.createElement('li');
+        // Usamos el mismo ID de producto para el botón eliminar,
+        // ya que ahora eliminará la línea completa.
         li.innerHTML = `${item.nombre} (x${item.cantidad}) - $${(item.precio * item.cantidad).toFixed(2)} 
                         <button data-id="${item.id}" class="eliminar-item">X</button>`;
         listaCarrito.appendChild(li);
@@ -215,43 +249,39 @@ function actualizarCarrito() {
     totalPedidoSpan.textContent = total.toFixed(2);
 
     document.querySelectorAll('.eliminar-item').forEach(button => {
-        button.addEventListener('click', eliminarDelCarrito);
+        // Asegúrate de que este listener apunte a la nueva lógica de eliminación completa.
+        button.addEventListener('click', eliminarItemCompletamenteDelCarrito);
     });
 
-    // Actualizar el texto de los botones y inputs de cantidad en las tarjetas de productos
     actualizarBotonesCantidad();
 }
 
-function eliminarDelCarrito(evento) {
+// Nueva función para eliminar el ítem completamente del carrito
+function eliminarItemCompletamenteDelCarrito(evento) {
     const productoId = evento.target.dataset.id;
-    const itemIndex = carrito.findIndex(item => item.id === productoId);
-
-    if (itemIndex > -1) {
-        carrito[itemIndex].cantidad--; // Decrementar la cantidad
-        if (carrito[itemIndex].cantidad <= 0) {
-            carrito.splice(itemIndex, 1); // Eliminar si la cantidad llega a 0
-        }
-    }
+    // Filtramos el carrito para remover el producto con el ID correspondiente
+    carrito = carrito.filter(item => item.id !== productoId);
     actualizarCarrito();
 }
 
+
 function actualizarBotonesCantidad() {
-    // Itera sobre todos los botones de "Agregar" y actualiza su texto y el input directo
-    document.querySelectorAll('.agregar-carrito').forEach(boton => {
-        const productoId = boton.dataset.id;
+    document.querySelectorAll('.producto-card').forEach(card => {
+        const productoId = card.querySelector('.agregar-carrito').dataset.id;
         const itemEnCarrito = carrito.find(item => item.id === productoId);
         const cantidadActual = itemEnCarrito ? itemEnCarrito.cantidad : 0;
-        boton.textContent = `Agregar (${cantidadActual})`;
 
-        // También actualiza el placeholder/value del input directo si es necesario
-        // (Aunque lo limpiamos después de usarlo, esto asegura consistencia si se recarga)
-        const inputDirecto = boton.nextElementSibling; // El input está justo después del botón
-        if (inputDirecto && inputDirecto.classList.contains('cantidad-input-directa')) {
-            // No seteamos el valor para que el placeholder sea visible, 
-            // solo limpiamos si el producto no está en el carrito
-            if (!itemEnCarrito) {
-                inputDirecto.value = '';
-            }
+        // Actualizar el input de cantidad directa
+        const inputDirecto = card.querySelector('.cantidad-input-directa');
+        if (inputDirecto) {
+            // Si el producto no está en el carrito (cantidad 0), limpiar el input
+            inputDirecto.value = cantidadActual > 0 ? cantidadActual : '';
+        }
+
+        // Deshabilitar botón de decrementar si la cantidad es 0
+        const botonDecrementar = card.querySelector('.cantidad-btn.decrementar');
+        if (botonDecrementar) {
+            botonDecrementar.disabled = cantidadActual === 0;
         }
     });
 }
@@ -259,14 +289,12 @@ function actualizarBotonesCantidad() {
 
 // --- Lógica del Modal de Confirmación y Envío a WhatsApp ---
 
-// Al hacer clic en finalizar pedido, abrimos el modal
 finalizarPedidoBtn.addEventListener('click', () => {
     if (carrito.length === 0) {
         alert('Tu carrito está vacío. ¡Agrega algunos productos antes de finalizar!');
         return;
     }
 
-    // Llenar el modal con el resumen del pedido
     modalListaCarrito.innerHTML = '';
     let totalModal = 0;
     carrito.forEach(item => {
@@ -277,29 +305,23 @@ finalizarPedidoBtn.addEventListener('click', () => {
     });
     modalTotalPedidoSpan.textContent = totalModal.toFixed(2);
 
-    // Mostrar el modal
     confirmOrderModal.style.display = 'block';
 });
 
-// Cerrar el modal cuando se hace clic en la X
 closeButton.addEventListener('click', () => {
     confirmOrderModal.style.display = 'none';
-    // Opcional: Limpiar los campos de la empresa al cerrar el modal
     empresaNombreInput.value = ''; 
     empresaRifInput.value = '';
 });
 
-// Cerrar el modal cuando se hace clic fuera de él
 window.addEventListener('click', (event) => {
     if (event.target == confirmOrderModal) {
         confirmOrderModal.style.display = 'none';
-        // Opcional: Limpiar los campos de la empresa al cerrar el modal
         empresaNombreInput.value = ''; 
         empresaRifInput.value = '';
     }
 });
 
-// Lógica para enviar el pedido desde el botón dentro del modal
 sendOrderBtn.addEventListener('click', () => {
     const empresaNombre = empresaNombreInput.value.trim();
     const empresaRif = empresaRifInput.value.trim();
@@ -313,31 +335,25 @@ sendOrderBtn.addEventListener('click', () => {
     carrito.forEach(item => {
         mensaje += `- ${item.nombre} (x${item.cantidad}) - $${(item.precio * item.cantidad).toFixed(2)}\n`;
     });
-    mensaje += `\nTotal del Pedido: $${modalTotalPedidoSpan.textContent}\n`; // Usamos el total del modal
+    mensaje += `\nTotal del Pedido: $${modalTotalPedidoSpan.textContent}\n`;
     mensaje += `\nDatos de la Empresa:\n`;
     mensaje += `Nombre: ${empresaNombre}\n`;
     mensaje += `RIF: ${empresaRif}\n\n`;
     mensaje += `¡Espero su confirmación!`;
 
     // ¡¡¡RECUERDA CAMBIAR ESTO POR TU NÚMERO DE WHATSAPP REAL!!!
-    // Formato: Código de país + número (sin el signo + ni espacios)
-    // Ejemplo para Venezuela: "584121234567"
     const numeroWhatsApp = "584244237456"; 
     const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
 
     window.open(urlWhatsApp, '_blank');
     
-    // Aquí puedes añadir un alert de confirmación antes de limpiar si lo deseas
     alert('Tu pedido ha sido enviado a Librería Santa Rosa por WhatsApp. ¡Gracias por tu compra!');
     
-    // Limpiar carrito, cerrar modal y limpiar campos
     carrito = []; 
     actualizarCarrito();
     confirmOrderModal.style.display = 'none';
-    empresaNombreInput.value = ''; // Limpiar campos del formulario
+    empresaNombreInput.value = '';
     empresaRifInput.value = '';
 });
 
-
-// Iniciar la carga de productos cuando la página se cargue
 cargarProductos();
